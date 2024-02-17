@@ -112,3 +112,25 @@
 .filter-dropdown option:hover {
   background-color: #46a049; /* Darker green */
 }
+form-control {
+  /* Add your desired styles here */
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 16px;
+}
+
+/* Styling the dropdown arrow */
+.select-arrow {
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.create-task-btn {
+    display: block;
+    margin: 0 auto; /* Centers the button horizontally */
+    margin-top: 20px; /* Adjust as needed */
+    /* Add any additional styles you want for the button */
+}

@@ -6,7 +6,7 @@ import Table from 'react-bootstrap/Table';
 import * as Yup from 'yup';
 import axios from 'axios';
 import Form from 'react-bootstrap/Form';
-
+import './Task.css'
 const Task = () => {
     const [formData, setFormData] = useState({
         title: '',
@@ -173,22 +173,28 @@ const Task = () => {
                                 />
                                 <Form.Control.Feedback type="invalid">{errors.due_date}</Form.Control.Feedback>
                             </Form.Group>
+                            <Form.Label>Status</Form.Label>
                             <Form.Control
-    as="select"
-    name="filterStatus"
-    value={filterStatus}
-    onChange={(e) => handleFilter(e.target.value)}
-    className="filter-dropdown"
->
-    <option value="">All Tasks</option>
-    <option value="Pending">Pending</option>
-    <option value="In Progress">In Progress</option>
-    <option value="Completed">Completed</option>
-</Form.Control>
+                                   as="select"
+                                   name="filterStatus"
+                                   value={filterStatus}
+                                   onChange={(e) => handleFilter(e.target.value)}
+                                 className="filter-dropdown"
+                            >
+                                 <option value="Pending">Pending</option>
+                                 <option value="In Progress">In Progress</option>
+                                 <option value="Completed">Completed</option>
+                            </Form.Control>
 
-                            <Button variant="primary" onClick={handleSubmit} type="submit">
-                                {selectedTaskId ? 'Update Task' : 'Create Task'}
-                            </Button>
+                            <Button 
+    variant="primary" 
+    onClick={EmptyField} 
+    type="submit"
+    className="create-task-btn"
+>
+    Create New Task
+</Button>
+
                         </Form>
                     </div>
                 </div>

@@ -4,6 +4,7 @@ import { ToastContainer, toast } from 'react-toastify';
 
 import Staff from "./components/Task";
 import 'bootstrap/dist/css/bootstrap.css';
+import Task from "./components/Task";
 function App() {
 
    const isAuthenticated = localStorage.getItem("valid");
@@ -11,7 +12,7 @@ function App() {
   return (
     <BrowserRouter>
     <Routes >
-     <Route path="/" element={<Staff />} /> 
+     <Route path="/" element={<Task />} /> 
     </Routes>
     <ToastContainer />
   </BrowserRouter>
