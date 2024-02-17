@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 // const validator = require('validator');
 
 const taskSchema = new mongoose.Schema({
-    type:{
+    title:{
         type:String,
         required:[true,'please enter type'],
         unique:true
@@ -12,17 +12,15 @@ const taskSchema = new mongoose.Schema({
         required: [true, 'Please enter description']
     },
     due_date: {
-        type: String,
-        required: [true, 'Please enter date']
+        type: Date,
+        required: [true, 'Please select date']
     },
-    state: {
-        
-        type: String,
-        required: [true, 'Please enter state'],
-        unique:true
-        // maxlength: [10, 'nic cannot exceed 10 characters'],
-
-    },
+    status: {
+         type: String,
+        enum: ['Pending', 'In Progress', 'Completed'], 
+        default: 'Pending'
+     }
+,
     createdAt: {
         type: Date,
         default: Date.now

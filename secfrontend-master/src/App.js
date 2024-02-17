@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Outlet,redirect} from "react-router-dom";
 import './App.css';
 import { ToastContainer, toast } from 'react-toastify';
 
-import Staff from "./components/Staff";
+import Staff from "./components/Task";
 import 'bootstrap/dist/css/bootstrap.css';
 function App() {
 
@@ -11,14 +11,7 @@ function App() {
   return (
     <BrowserRouter>
     <Routes >
-    
-
-     
-     
-        <Route path="/Staff" element={<Staff />} />
-    
-      
-     
+     <Route path="/" element={<Staff />} /> 
     </Routes>
     <ToastContainer />
   </BrowserRouter>
