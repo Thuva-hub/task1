@@ -1,29 +1,27 @@
-// Task.js
-
 import React, { useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Table from 'react-bootstrap/Table';
 import * as Yup from 'yup';
 import axios from 'axios';
 import Form from 'react-bootstrap/Form';
-import './Task.css'
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import './Task.css';
+
 const Task = () => {
+    // State variables
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         due_date: '',
         status: ''
     });
-    const [errors, setErrors] = useState([]);
+    const [errors, setErrors] = useState({});
     const [tasks, setTasks] = useState([]);
     const [filterStatus, setFilterStatus] = useState('');
     const [selectedTaskId, setSelectedTaskId] = useState(null);
 
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData((prevFormData) => ({ ...prevFormData, [name]: value }));
-    };
-
+    // Form validation schema
     const validationSchema = Yup.object().shape({
         title: Yup.string().required('Title is required'),
         description: Yup.string().required('Description is required'),
@@ -31,33 +29,45 @@ const Task = () => {
         status: Yup.string().required('State is required')
     });
 
-    const handleEdit = (task) => {
-        const { title, description, due_date, status, _id } = task;
-        setFormData({
-            title,
-            description,
-            due_date: formatDateForInput(due_date),
-            status,
-        });
-        setSelectedTaskId(_id);
+    // Handle form input change
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prevFormData => ({ ...prevFormData, [name]: value }));
     };
 
+    // Format date for input field
+    const formatDateForInput = (dateString) => {
+        const date = new Date(dateString);
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
+
+    // Get all tasks
+    const getAllTasks = async () => {
+        try {
+            const response = await axios.get('http://localhost:5001/api/task');
+            setTasks(response.data);
+        } catch (error) {
+            console.error('Error fetching tasks:', error);
+        }
+    };
+
+    // Handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             await validationSchema.validate(formData, { abortEarly: false });
             if (selectedTaskId) {
                 await axios.put(`http://localhost:5001/api/task/${selectedTaskId}`, formData);
-                EmptyField();
-                GetAllTasks();
+                toast.success('Task updated successfully.');
             } else {
-                const response = await axios.post('http://localhost:5001/api/task', formData);
-                if (response.status === 201) {
-                    alert('Task created successfully.');
-                    EmptyField();
-                    GetAllTasks();
-                }
+                await axios.post('http://localhost:5001/api/task', formData);
+                toast.success('Task created successfully.');
             }
+            resetForm();
+            getAllTasks();
         } catch (error) {
             if (error instanceof Yup.ValidationError) {
                 const newErrors = {};
@@ -71,51 +81,8 @@ const Task = () => {
         }
     };
 
-    const formatDateForInput = (dateString) => {
-        const date = new Date(dateString);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        return `${year}-${month}-${day}`;
-    };
-
-    const GetAllTasks = async () => {
-        try {
-            const response = await axios.get('http://localhost:5001/api/task');
-            if (!response) {
-                console.log('No data');
-            } else {
-                setTasks(response.data);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    };
-
-    const handleFilter = async (filterStatus) => {
-        try {
-            setFilterStatus(filterStatus)
-            if (filterStatus) {
-                const response = await axios.get(`http://localhost:5001/api/task/${filterStatus}`);
-                setTasks(response.data);
-            } else {
-                GetAllTasks();
-            }
-        } catch (error) {
-            console.error('Error filtering tasks:', error);
-        }
-    };
-
-    const handleDelete = async (taskId) => {
-        try {
-            await axios.delete(`http://localhost:5001/api/task/${taskId}`);
-            GetAllTasks();
-        } catch (error) {
-            console.error('Error deleting task:', error);
-        }
-    };
-
-    const EmptyField = () => {
+    // Reset form fields and selected task ID
+    const resetForm = () => {
         setFormData({
             title: '',
             description: '',
@@ -125,16 +92,52 @@ const Task = () => {
         setSelectedTaskId(null);
     };
 
+    // Handle editing a task
+    const handleEdit = (task) => {
+        const { title, description, due_date, status, _id } = task;
+        setFormData({
+            title,
+            description,
+            due_date: formatDateForInput(due_date),
+            status,
+        });
+        setSelectedTaskId(_id);
+    };
+
+    // Handle filtering tasks
+    const handleFilter = async (filterStatus) => {
+        try {
+            setFilterStatus(filterStatus);
+            const response = await axios.get(filterStatus ? `http://localhost:5001/api/task/${filterStatus}` : 'http://localhost:5001/api/task');
+            setTasks(response.data);
+        } catch (error) {
+            console.error('Error filtering tasks:', error);
+        }
+    };
+
+    // Handle deleting a task
+    const handleDelete = async (taskId) => {
+        try {
+            await axios.delete(`http://localhost:5001/api/task/${taskId}`);
+            toast.success('Task deleted successfully.');
+            getAllTasks();
+        } catch (error) {
+            console.error('Error deleting task:', error);
+        }
+    };
+
+    // Fetch tasks on component mount
     useEffect(() => {
-        GetAllTasks();
+        getAllTasks();
     }, []);
 
+    // JSX
     return (
-        <div className="container mx-auto p-4 bg-gray-200 min-h-screen">
+        <div className="container">
             <div className="TaskContainer">
                 <div className='content-area'>
                     <div className="table-header">
-                        <h2 className="table-title text-2xl font-bold mb-4">Task Detail</h2>
+                        <h2 className="table-title">Task Detail</h2>
                         <Form onSubmit={handleSubmit} className='form'>
                             <Form.Group className="mb-3" controlId="title">
                                 <Form.Label>Title</Form.Label>
@@ -173,34 +176,31 @@ const Task = () => {
                                 />
                                 <Form.Control.Feedback type="invalid">{errors.due_date}</Form.Control.Feedback>
                             </Form.Group>
-                            <Form.Label>Status</Form.Label>
-                            <Form.Control
-                                   as="select"
-                                   name="filterStatus"
-                                   value={filterStatus}
-                                   onChange={(e) => handleFilter(e.target.value)}
-                                 className="filter-dropdown"
-                            >
-                                 <option value="Pending">Pending</option>
-                                 <option value="In Progress">In Progress</option>
-                                 <option value="Completed">Completed</option>
-                            </Form.Control>
-
-                            <Button 
-    variant="primary" 
-    onClick={EmptyField} 
-    type="submit"
-    className="create-task-btn"
->
-    Create New Task
-</Button>
-
+                            <Form.Group className="mb-3" controlId="status">
+                                <Form.Label>Status</Form.Label>
+                                <Form.Control
+                                    as="select"
+                                    name="status"
+                                    value={formData.status}
+                                    onChange={handleInputChange}
+                                    isInvalid={!!errors.status}
+                                >
+                                    <option value="">Select Status</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Completed">Completed</option>
+                                </Form.Control>
+                                <Form.Control.Feedback type="invalid">{errors.status}</Form.Control.Feedback>
+                            </Form.Group>
+                            <Button variant="primary" type="submit">
+                                {selectedTaskId ? 'Update Task' : 'Create Task'}
+                            </Button>
                         </Form>
                     </div>
                 </div>
                 <div className='TaskDetail'>
                     <div className='table-top'>
-                        {selectedTaskId ? <Button variant="primary" onClick={EmptyField} type="submit">Create New Task</Button> : ""}
+                        {selectedTaskId && <Button variant="primary" onClick={resetForm}>Create New Task</Button>}
                     </div>
                     <Form onSubmit={handleSubmit} className='form'>
                         <Form.Group className="mb-3" controlId="filterStatus">
@@ -247,8 +247,9 @@ const Task = () => {
                     </Table>
                 </div>
             </div>
+            <ToastContainer />
         </div>
     );
-}
+};
 
 export default Task;
